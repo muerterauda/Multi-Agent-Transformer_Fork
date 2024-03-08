@@ -58,7 +58,7 @@ def continuous_autoregreesive_act(decoder, obs_rep, obs, batch_size, n_agent, ac
     shifted_action = torch.zeros((batch_size, n_agent, action_dim)).to(**tpdv)
     output_action = torch.zeros((batch_size, n_agent, action_dim), dtype=torch.float32)
     output_action_log = torch.zeros_like(output_action, dtype=torch.float32)
-
+    v_loc = None
     for i in range(n_agent):
         act_mean, v_loc = decoder(shifted_action, obs_rep, obs)
         act_mean = act_mean[:, i, :]
@@ -95,7 +95,6 @@ def continuous_parallel_act(decoder, obs_rep, obs, action, batch_size, n_agent, 
     action_log = distri.log_prob(action)
     entropy = distri.entropy()
     return action_log, entropy, v_loc
-
 
 
 class SelfAttention(nn.Module):
@@ -260,10 +259,11 @@ class MultiAgentDecoder(nn.Module):
         if self.action_type == 'Discrete':
             action = action.long()
             action_log, entropy, v_loc = discrete_parallel_act(self.decoder, None, obs, action, batch_size,
-                                                        self.n_agent, self.action_dim, self.tpdv, available_actions)
+                                                               self.n_agent, self.action_dim, self.tpdv,
+                                                               available_actions)
         else:
             action_log, entropy, v_loc = continuous_parallel_act(self.decoder, None, obs, action, batch_size,
-                                                          self.n_agent, self.action_dim, self.tpdv)
+                                                                 self.n_agent, self.action_dim, self.tpdv)
         return action_log, v_loc, entropy
 
     def get_actions(self, state, obs, available_actions=None, deterministic=False):
@@ -279,12 +279,14 @@ class MultiAgentDecoder(nn.Module):
         batch_size = np.shape(obs)[0]
         if self.action_type == "Discrete":
             output_action, output_action_log, v_loc = discrete_autoregreesive_act(self.decoder, None, obs, batch_size,
-                                                                           self.n_agent, self.action_dim, self.tpdv,
-                                                                           available_actions, deterministic)
+                                                                                  self.n_agent, self.action_dim,
+                                                                                  self.tpdv,
+                                                                                  available_actions, deterministic)
         else:
             output_action, output_action_log, v_loc = continuous_autoregreesive_act(self.decoder, None, obs, batch_size,
-                                                                             self.n_agent, self.action_dim, self.tpdv,
-                                                                             deterministic)
+                                                                                    self.n_agent, self.action_dim,
+                                                                                    self.tpdv,
+                                                                                    deterministic)
 
         return output_action, output_action_log, v_loc
 
@@ -292,6 +294,3 @@ class MultiAgentDecoder(nn.Module):
         _, __, v_loc = self.get_actions(state, obs, available_actions)
 
         return v_loc
-
-
-

@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
-import math
 import numpy as np
-from torch.distributions import Categorical
 from mat.algorithms.utils.util import check, init
 from mat.algorithms.utils.transformer_act import discrete_autoregreesive_act
 from mat.algorithms.utils.transformer_act import discrete_parallel_act

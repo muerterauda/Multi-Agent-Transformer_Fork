@@ -1,9 +1,8 @@
 import torch
 import numpy as np
 from mat.utils.util import update_linear_schedule
-from mat.utils.util import get_shape_from_obs_space, get_shape_from_act_space
+from mat.utils.util import get_shape_from_obs_space
 from mat.algorithms.utils.util import check
-from mat.algorithms.mat.algorithm.ma_transformer import MultiAgentTransformer
 
 
 class TransformerPolicy:

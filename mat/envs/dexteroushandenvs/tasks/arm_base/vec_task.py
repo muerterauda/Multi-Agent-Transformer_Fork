@@ -460,7 +460,7 @@ class VecTask(Env):
 		if self.actor_params_generator is not None:
 			for env_id in env_ids:
 				self.extern_actor_params[env_id] = \
-					self.actor_params_generator.sample()
+                    self.actor_params_generator.sample()
 				extern_offsets[env_id] = 0
 
 		for actor, actor_properties in dr_params["actor_params"].items():

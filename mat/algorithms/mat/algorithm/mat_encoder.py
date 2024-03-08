@@ -5,10 +5,7 @@ import math
 import numpy as np
 from torch.distributions import Categorical, Normal
 from mat.algorithms.utils.util import check, init
-from mat.algorithms.utils.transformer_act import discrete_autoregreesive_act
-from mat.algorithms.utils.transformer_act import discrete_parallel_act
-from mat.algorithms.utils.transformer_act import continuous_autoregreesive_act
-from mat.algorithms.utils.transformer_act import continuous_parallel_act
+
 
 def init_(m, gain=0.01, activate=False):
     if activate:
@@ -108,7 +105,7 @@ class Encoder(nn.Module):
         self.head = nn.Sequential(init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
                                   init_(nn.Linear(n_embd, 1)))
         self.act_head = nn.Sequential(init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
-                                  init_(nn.Linear(n_embd, action_dim)))
+                                      init_(nn.Linear(n_embd, action_dim)))
         if action_type != 'Discrete':
             log_std = torch.ones(action_dim)
             # log_std = torch.zeros(action_dim)
@@ -235,6 +232,3 @@ class MultiAgentEncoder(nn.Module):
         obs = check(obs).to(**self.tpdv)
         v_tot, _, _ = self.encoder(state, obs)
         return v_tot
-
-
-

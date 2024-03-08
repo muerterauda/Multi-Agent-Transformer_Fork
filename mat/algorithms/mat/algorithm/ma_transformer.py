@@ -3,12 +3,12 @@ import torch.nn as nn
 from torch.nn import functional as F
 import math
 import numpy as np
-from torch.distributions import Categorical
 from mat.algorithms.utils.util import check, init
 from mat.algorithms.utils.transformer_act import discrete_autoregreesive_act
 from mat.algorithms.utils.transformer_act import discrete_parallel_act
 from mat.algorithms.utils.transformer_act import continuous_autoregreesive_act
 from mat.algorithms.utils.transformer_act import continuous_parallel_act
+
 
 def init_(m, gain=0.01, activate=False):
     if activate:
@@ -168,15 +168,19 @@ class Decoder(nn.Module):
             if self.share_actor:
                 print("mac_dec!!!!!")
                 self.mlp = nn.Sequential(nn.LayerNorm(obs_dim),
-                                         init_(nn.Linear(obs_dim, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
-                                         init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
+                                         init_(nn.Linear(obs_dim, n_embd), activate=True), nn.GELU(),
+                                         nn.LayerNorm(n_embd),
+                                         init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(),
+                                         nn.LayerNorm(n_embd),
                                          init_(nn.Linear(n_embd, action_dim)))
             else:
                 self.mlp = nn.ModuleList()
                 for n in range(n_agent):
                     actor = nn.Sequential(nn.LayerNorm(obs_dim),
-                                          init_(nn.Linear(obs_dim, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
-                                          init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(), nn.LayerNorm(n_embd),
+                                          init_(nn.Linear(obs_dim, n_embd), activate=True), nn.GELU(),
+                                          nn.LayerNorm(n_embd),
+                                          init_(nn.Linear(n_embd, n_embd), activate=True), nn.GELU(),
+                                          nn.LayerNorm(n_embd),
                                           init_(nn.Linear(n_embd, action_dim)))
                     self.mlp.append(actor)
         else:
@@ -307,6 +311,3 @@ class MultiAgentTransformer(nn.Module):
         obs = check(obs).to(**self.tpdv)
         v_tot, obs_rep = self.encoder(state, obs)
         return v_tot
-
-
-

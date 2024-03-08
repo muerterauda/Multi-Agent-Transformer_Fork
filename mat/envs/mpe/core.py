@@ -1,4 +1,6 @@
 import numpy as np
+
+
 # import seaborn as sns
 
 # physical/external base state of all entites
@@ -9,12 +11,14 @@ class EntityState(object):
         # physical velocity
         self.p_vel = None
 
+
 # state of agents (including communication and internal/mental state)
 class AgentState(EntityState):
     def __init__(self):
         super(AgentState, self).__init__()
         # communication utterance
         self.c = None
+
 
 # action of the agent
 class Action(object):
@@ -23,6 +27,7 @@ class Action(object):
         self.u = None
         # communication action
         self.c = None
+
 
 # properties of wall entities
 class Wall(object):
@@ -75,10 +80,12 @@ class Entity(object):
     def mass(self):
         return self.initial_mass
 
+
 # properties of landmark entities
 class Landmark(Entity):
     def __init__(self):
         super(Landmark, self).__init__()
+
 
 # properties of agent entities
 class Agent(Entity):
@@ -108,6 +115,7 @@ class Agent(Entity):
         self.action_callback = None
         # zoe 20200420
         self.goal = None
+
 
 # multi-agent world
 class World(object):
@@ -234,7 +242,7 @@ class World(object):
                     *agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
                 # force = mass * a * action + n
                 p_force[i] = (
-                    agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
+                                 agent.mass * agent.accel if agent.accel is not None else agent.mass) * agent.action.u + noise
         return p_force
 
     # gather physical forces acting on entities
@@ -242,15 +250,15 @@ class World(object):
         # simple (but inefficient) collision response
         for a, entity_a in enumerate(self.entities):
             for b, entity_b in enumerate(self.entities):
-                if(b <= a):
+                if (b <= a):
                     continue
                 [f_a, f_b] = self.get_entity_collision_force(a, b)
-                if(f_a is not None):
-                    if(p_force[a] is None):
+                if (f_a is not None):
+                    if (p_force[a] is None):
                         p_force[a] = 0.0
                     p_force[a] = f_a + p_force[a]
-                if(f_b is not None):
-                    if(p_force[b] is None):
+                if (f_b is not None):
+                    if (p_force[b] is None):
                         p_force[b] = 0.0
                     p_force[b] = f_b + p_force[b]
             if entity_a.movable:
@@ -274,7 +282,8 @@ class World(object):
                     np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
-                                                                      np.square(entity.state.p_vel[1])) * entity.max_speed
+                                                                      np.square(
+                                                                          entity.state.p_vel[1])) * entity.max_speed
             entity.state.p_pos += entity.state.p_vel * self.dt
 
     def update_agent_state(self, agent):
@@ -283,7 +292,7 @@ class World(object):
             agent.state.c = np.zeros(self.dim_c)
         else:
             noise = np.random.randn(*agent.action.c.shape) * \
-                agent.c_noise if agent.c_noise else 0.0
+                    agent.c_noise if agent.c_noise else 0.0
             agent.state.c = agent.action.c + noise
 
     # get collision forces for any contact between two entities
@@ -308,7 +317,7 @@ class World(object):
             dist_min = entity_a.size + entity_b.size
         # softmax penetration
         k = self.contact_margin
-        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+        penetration = np.logaddexp(0, -(dist - dist_min) / k) * k
         force = self.contact_force * delta_pos / dist * penetration
         if entity_a.movable and entity_b.movable:
             # consider mass in collisions
@@ -353,7 +362,7 @@ class World(object):
         dist = np.abs(delta_pos)
         # softmax penetration
         k = self.contact_margin
-        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+        penetration = np.logaddexp(0, -(dist - dist_min) / k) * k
         force_mag = self.contact_force * delta_pos / dist * penetration
         force = np.zeros(2)
         force[perp_dim] = np.cos(theta) * force_mag
